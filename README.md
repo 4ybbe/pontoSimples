@@ -17,7 +17,7 @@ python3 generate_key.py
 
 #### Registrando a aplicação no linux (ubuntu server):
 ```bash
-  sudo nano /etc/systemd/system/ponto.service
+sudo nano /etc/systemd/system/ponto.service
 ```
 
 ```bash
