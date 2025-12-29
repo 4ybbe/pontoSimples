@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% if user_type == 'admin' %}
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-header">Admin Panel</div>
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if active_page == 'dashboard' }}">Gerenciar</a>
+                    <a href="{{ url_for('admin_reports') }}" class="{{ 'active' if active_page == 'reports' }}">Relatórios</a>
+                </nav>
+            </div>
+            <div class="sidebar-footer">
+                <a href="{{ url_for('logout') }}" class="button">Sair</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="main-content-header">
+                <h2>Gerenciar Usuários e Horários</h2>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}{% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}{% endif %}
+            {% endwith %}
+            <div class="card">
+                <h3>Registrar Novo Usuário</h3>
+                <form action="{{ url_for('register_user') }}" method="post">
+                    <input type="text" name="nome" placeholder="Nome Completo" required>
+                    <input type="text" name="cpf" placeholder="CPF (será o usuário)" required>
+                    <button type="submit">Cadastrar Usuário</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>Gerenciar Horários de Trabalho</h3>
+                <p>Se o usuário já tiver um horário, ele será atualizado.</p>
+                <form action="{{ url_for('salvar_horario') }}" method="post">
+                    <label for="user_id">Usuário</label>
+                    <select name="user_id" id="user_id" required>
+                        <option value="" disabled selected>Selecione um usuário</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.nome }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="time-grid">
+                        <div><label for="entrada1">Entrada 1</label><input type="time" name="entrada1" id="entrada1"></div>
+                        <div><label for="saida1">Saída 1</label><input type="time" name="saida1" id="saida1"></div>
+                        <div><label for="entrada2">Entrada 2</label><input type="time" name="entrada2" id="entrada2"></div>
+                        <div><label for="saida2">Saída 2</label><input type="time" name="saida2" id="saida2"></div>
+                    </div>
+                    <button type="submit">Salvar / Atualizar Horário</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    {% else %}
+    <div class="centered-layout">
+        <div class="container">
+            <a href="{{ url_for('logout') }}" class="logout-link">Sair</a>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}{% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}{% endif %}
+            {% endwith %}
+            <h1>Bem-vindo, {{ user_name }}!</h1>
+            {% if has_schedule %}
+                <p class="subtitle">Seu relógio de ponto virtual está ativo.</p>
+                
+                <div class="ponto-container">
+                    {% if actions %}
+                        {% for action, time in actions.items() %}
+                            <div class="ponto-item">
+                                <span>{{ action.replace('1', ' 1').replace('2', ' 2')|title }}: <strong>{{ time }}</strong></span>
+                                
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; width: 100%;">
+                                    
+                                    <form action="{{ url_for('registrar_meu_ponto', tipo_registro=action) }}" method="post" style="flex: 1; min-width: 140px;">
+                                        <button type="submit" class="ponto-button">Registrar Agora</button>
+                                    </form>
+
+                                    <button type="button" class="button button-secondary" onclick="abrirModalJustificativa('{{ action }}')" style="flex: 1; min-width: 140px; white-space: nowrap;">
+                                        Registrar c/ Justificativa
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-actions">Nenhum registro de ponto disponível no momento.</p>
+                    {% endif %}
+                </div>
+
+                <div class="card" style="margin-top: 2rem; text-align: center; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                    <h3>Meus Relatórios</h3>
+                    <p style="margin-bottom: 1rem; color: #666;">Baixe o espelho de ponto referente ao mês atual.</p>
+                    <a href="{{ url_for('export_meu_ponto') }}" class="button button-secondary" style="display: inline-block; width: auto; padding: 0.5rem 2rem; text-decoration: none;">
+                        Exportar Excel (Mês Atual)
+                    </a>
+                </div>
+
+            {% else %}
+                <p class="no-actions" style="margin-top: 2rem;">
+                    <strong>Atenção:</strong> Seu horário de trabalho ainda não foi configurado pelo administrador.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div id="modalJustificativa" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="fecharModalJustificativa()">&times;</span>
+            <h3 style="margin-top: 0;">Justificar Ponto</h3>
+            
+            <form id="formJustificativa" method="POST">
+                <label for="textoJustificativa">Motivo / Justificativa:</label>
+                <textarea id="textoJustificativa" name="justificativa" rows="4" required placeholder="Ex: Atrasei devido ao trânsito na Av. Principal... etc etc" style="width: 100%; margin-bottom: 1.5rem;"></textarea>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="button button-secondary" onclick="fecharModalJustificativa()">Cancelar</button>
+                    <button type="submit" class="button">Confirmar e Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalJustificativa(tipoRegistro) {
+            const modal = document.getElementById('modalJustificativa');
+            const form = document.getElementById('formJustificativa');
+            
+            form.action = "/registrar_meu_ponto/" + tipoRegistro;
+            
+            modal.style.display = 'flex';
+        }
+
+        function fecharModalJustificativa() {
+            const modal = document.getElementById('modalJustificativa');
+            modal.style.display = 'none';
+            document.getElementById('textoJustificativa').value = '';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalJustificativa');
+            if (event.target == modal) {
+                fecharModalJustificativa();
+            }
+        }
+    </script>
+
+</body>
+</html>

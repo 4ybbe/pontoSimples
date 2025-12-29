@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code para Novo Usuário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="centered-layout">
+        <div class="container">
+            <h1>QR Code para {{ user_name }}</h1>
+            <p class="subtitle">Escaneie o código abaixo com o app Google Authenticator.</p>
+            <div class="qr-code-container">
+                <img src="data:image/png;base64,{{ qr_code_img }}" alt="QR Code OTP">
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="button">Voltar ao Painel</a>
+        </div>
+    </div>
+</body>
+</html>
