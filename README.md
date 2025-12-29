@@ -5,6 +5,12 @@ Aplicação simples de registro de ponto (para homologação somente) para um me
 
 
 ## Instalação e uso:
+
+```bash 
+git clone https://github.com/4ybbe/pontoSimples
+cd pontoSimples
+```
+
 #### Dependencias:
 ```bash 
 pip install Flask pyotp qrcode cryptography openpyxl Pillow
