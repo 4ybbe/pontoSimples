@@ -62,6 +62,13 @@ O usuario para registrar o ponto sera o CPF cadastrado e a senha sera o codigo d
 #### Aba de relatório de ponto:
 Aqui sera aonde voce (administrador) podera ver e exportar os registros de cada funcionario cadastrado. Pode ser usado tanto para consulta quanto para exportar o recibo do ponto em si.
 
+## Screenshots
+#### Tela de registro de ponto do funcionario:
+![Alt text](img/func.png)
+
+#### Tela do dashboard do administrador:
+![Alt text](img/admin.png)
+
 ## Avisos:
 Esse projeto tem o proposito de controlar e gerenciar o registro do ponto dos funcionarios de empresas com menos de 20 funcionarios (aonde não é necessario o registro de ponto).
 Caso a empresa tenha mais de 20 funcionarios e você queira implementar essa aplicação, sera necessario passar por diversas exigencias do governo, basta procurar por "REP-P Como funciona"
